@@ -12,6 +12,7 @@
     <name>helloTgBot</name>
     <modules>
         <module>dispatcher</module>
+        <module>common-rabbitMQ</module>
     </modules>
 
     <properties>

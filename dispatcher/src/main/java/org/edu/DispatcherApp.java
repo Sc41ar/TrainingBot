@@ -23,6 +23,7 @@ public class DispatcherApp {
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         try {
             botsApi.registerBot(bot);
+
         } catch (TelegramApiException e) {
             System.out.println("Runtime EX");
             System.out.println(e.getMessage());

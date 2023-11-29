@@ -18,7 +18,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String botName;
     @Value("${bot.token}")
     private String botToken;
-    private UpdateController updateController;
+    private final UpdateController updateController;
 
 
     public TelegramBot(UpdateController updateController) {
@@ -28,6 +28,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @PostConstruct
     public void init(){
+        updateController.registerBot(this);
     }
 
     @Override
@@ -43,11 +44,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         var originalMessage = update.getMessage();
-        log.info(originalMessage.getText());
-        var response = new SendMessage();
-        response.setChatId(originalMessage.getChatId().toString());
-        response.setText("Ya tvou mamu cenil)");
-        sendAnswerMessage(response);
+        updateController.processUpdate(update);
     }
 
     public void sendAnswerMessage(SendMessage message){
