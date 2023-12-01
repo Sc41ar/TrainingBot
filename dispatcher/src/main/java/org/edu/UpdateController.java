@@ -3,14 +3,13 @@ package org.edu;
 import lombok.extern.log4j.Log4j2;
 import org.edu.controller.TelegramBot;
 import org.edu.service.UpdateProducer;
-import org.edu.service.impl.UpdateProducerImpl;
 import org.edu.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import static org.example.model.RabbitQueue.*;
+import static org.edu.model.RabbitQueue.*;
 
 @Component
 @Log4j2
@@ -38,7 +37,7 @@ public class UpdateController {
         if(update.getMessage() != null) {
             distributeMessagesByType(update);
         }else {
-            log.error("Received unsupported message type" + update);
+            log.error("Received unsupported message type"+ "\n" + update);
         }
     }
 
@@ -84,7 +83,7 @@ public class UpdateController {
 
     //Для сохранения вертикали вызовов. Возможность вызывать отправку сообщений из других модулей.
     //Также обеспечивает "стройность" класса бота
-    private void setView(SendMessage sendMessage) {
+    public void setView(SendMessage sendMessage) {
         telegramBot.sendAnswerMessage(sendMessage);
     }
 
