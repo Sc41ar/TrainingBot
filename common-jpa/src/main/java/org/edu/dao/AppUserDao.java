@@ -9,4 +9,5 @@ public interface AppUserDao extends JpaRepository<AppUser, Long>,
         JpaSpecificationExecutor<AppUser> {
     //реализация за спрингом
     AppUser findAppUserByTelegramUserId(Long id);
+    AppUser findAppUserByFirstName(String firstName);
 }

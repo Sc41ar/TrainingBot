@@ -6,6 +6,7 @@ import org.edu.entity.enums.UserState;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 //добавить поля для сохранения пол hbателя
 @Getter
@@ -28,4 +29,10 @@ public class AppUser {
     private String username;
     @Enumerated(EnumType.STRING)
     private UserState state;
+    @ManyToMany
+    @JoinTable(
+            name = "occupation_student",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "occupation_id"))
+    private Set<Occupation> lessons;
 }

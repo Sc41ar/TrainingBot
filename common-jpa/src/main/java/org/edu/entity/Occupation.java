@@ -3,6 +3,9 @@ package org.edu.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+import java.util.Set;
+
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = "id")
@@ -15,9 +18,11 @@ public class Occupation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String occupation_id;
-    private java.sql.Date date;
+    private String occupation_name;
+    private Date date;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id")
     private AppUser teacher;
+    @ManyToMany(mappedBy = "lessons")
+    private Set<AppUser> participants;
 }

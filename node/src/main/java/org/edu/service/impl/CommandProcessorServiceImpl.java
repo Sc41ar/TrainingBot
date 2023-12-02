@@ -1,23 +1,37 @@
 package org.edu.service.impl;
 
+import lombok.extern.log4j.Log4j2;
+import org.edu.dao.AppUserDao;
+import org.edu.dao.OccupationDao;
 import org.edu.entity.AppUser;
+import org.edu.entity.Occupation;
 import org.edu.service.CommandProcessorService;
 import org.edu.service.ProducerService;
 import org.edu.service.enums.ServiceCommands;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+
 import static org.edu.entity.enums.UserState.ADMIN_STATE;
 import static org.edu.entity.enums.UserState.TEACHER_STATE;
 import static org.edu.service.enums.ServiceCommands.*;
 
 @Service
+@Log4j2
 public class CommandProcessorServiceImpl implements CommandProcessorService {
 
     private final ProducerService producerService;
+    private final AppUserDao appUserDao;
+    private final OccupationDao occupationDao;
 
-    public CommandProcessorServiceImpl(ProducerService producerService) {
+    public CommandProcessorServiceImpl(ProducerService producerService, AppUserDao appUserDao, OccupationDao occupationDao) {
         this.producerService = producerService;
+        this.appUserDao = appUserDao;
+        this.occupationDao = occupationDao;
     }
 
     @Override
@@ -29,15 +43,24 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
             return help(appUser);
         } else if (START.equals(cmd)) {
             return "Чтобы посмотреть список доступных комманд введите /help";
-        } else if (cmd.matches("^(/occupation)(.*)$")) {
+        } //Создание занятия
+        else if (cmd.matches("^(/occupation)(.*)$")) {
             processOccupation(appUser, cmd);
             return "";
         } else if (AUTH.equals(cmd)) {
             processAuth(appUser);
             return "OK";
+        }//создание записи на занятие
+        else if (APPOINTMENT.equals(cmd)) {
+            processAppointment(appUser, cmd);
+            return "Запись совершена";
         } else {
             return "Чтобы посмотреть список доступных комманд введите /help";
         }
+    }
+
+    private void processAppointment(AppUser appUser, String cmd) {
+
     }
 
     private void processAuth(AppUser appUser) {
@@ -45,17 +68,43 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
     }
 
     private void processOccupation(AppUser appUser, String cmd) {
-        if (false){
+        if (cmd.matches("^(/occupation) (0[1-9]|[12][0-9]|3[0-1])\\.(0[1-9]|1[0-2])\\.(202[3-9]):([01][0-9]|2[0-3])\\.([0-6][0-9]);\"(([a-zA-Zа-яА-Я _+@]+)*)\";\"([а-яА-ЯA-Za-z0-9]+)\"$")) {
+            String output = parseOccupation(cmd);
 
-        }
-        else if (appUser.getState() == TEACHER_STATE || appUser.getState() == ADMIN_STATE) {
-            sendAnswer("Для записи информации о предстоящих занятиях, пожалуйста повторно введите команду в следующем формате: " +
-                    "\n\n/occupation dd.mm.yyyy;\"название группы\";\"ваше имя\"" +
-                    "\n\nВажно! Указывайте имя такое же как и в телеграмме, а то бот вас не поймет"
+            sendAnswer(output, appUser.getTelegramUserId());
+        } else if (appUser.getState() == TEACHER_STATE || appUser.getState() == ADMIN_STATE) {
+            sendAnswer("Для записи информации о предстоящих занятиях," +
+                            " пожалуйста повторно введите команду в следующем формате: " +
+                            "\n\n/occupation dd.mm.yyyy:hours.min;\"название группы\";\"ваше имя\"" +
+                            "\n\nВажно! Указывайте имя такое же как и в телеграмме, а то бот вас не поймет"
                     , appUser.getTelegramUserId());
         } else {
-            sendAnswer( "У вас недостаточно полномочий", appUser.getTelegramUserId());
+            sendAnswer("У вас недостаточно полномочий", appUser.getTelegramUserId());
         }
+    }
+
+    private String parseOccupation(String string) {
+        try {
+            string = string.replaceAll("\"", "");
+            ArrayList<String> subStrings = new java.util.ArrayList<>(Arrays.stream(((string.split("/occupation|;")))).toList());
+            subStrings.removeIf(String::isEmpty);
+            if (subStrings.size() != 3) {
+                log.error(string + "Ошибка прочтения данных");
+                return "Ошибка чтения данных";
+            }
+            SimpleDateFormat format = new SimpleDateFormat(" dd.MM.yyyy:HH.mm");
+            Date parsedDate = format.parse(subStrings.get(0));
+            Occupation occupation = Occupation.builder()
+                    .occupation_name(subStrings.get(1))
+                    .date(parsedDate)
+                    .teacher(appUserDao.findAppUserByFirstName(subStrings.get(2)))
+                    .build();
+            occupationDao.save(occupation);
+        } catch (Exception e) {
+            log.error(e.getMessage() + "\n" + e.getCause());
+            return "Ошибка чтения";
+        }
+        return "Vse ok";
     }
 
     private void sendAnswer(String output, Long chatId) {
