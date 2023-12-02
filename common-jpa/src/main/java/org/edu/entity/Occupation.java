@@ -17,5 +17,7 @@ public class Occupation {
     private Long id;
     private String occupation_id;
     private java.sql.Date date;
-    private Long teacher_id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "teacher_id")
+    private AppUser teacher;
 }

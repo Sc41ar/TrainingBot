@@ -5,10 +5,8 @@ import org.edu.dao.AppUserDao;
 import org.edu.dao.RawDataDao;
 import org.edu.entity.AppUser;
 import org.edu.entity.RawData;
-import org.edu.entity.enums.UserState;
 import org.edu.service.MainService;
 import org.edu.service.ProducerService;
-import org.edu.service.enums.ServiceCommands;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -25,11 +23,13 @@ public class MainServiceImpl implements MainService {
     private final RawDataDao rawDataDao;
     private final ProducerService producerService;
     private final AppUserDao appUserDao;
+    private final CommandProcessorServiceImpl commandProcessorService;
 
-    public MainServiceImpl(RawDataDao rawDataDao, ProducerService producerService, AppUserDao appUserDao) {
+    public MainServiceImpl(RawDataDao rawDataDao, ProducerService producerService, AppUserDao appUserDao, CommandProcessorServiceImpl commandProcessorService) {
         this.rawDataDao = rawDataDao;
         this.producerService = producerService;
         this.appUserDao = appUserDao;
+        this.commandProcessorService = commandProcessorService;
     }
 
     @Override
@@ -41,49 +41,22 @@ public class MainServiceImpl implements MainService {
 
         if (CANCEL.equals(text)) {
             output = cancelProcess(appUser);
-        } else if (BASIC_STATE.equals(appUser)){
-            output=processServiceCommand(appUser, text);
-        }else if(TEACHER_STATE.equals(appUser)){
-
-        }else {
-            output= processServiceCommand(appUser, text);
+        }/* else if (BASIC_STATE.equals(appUser)) {
+            output = commandProccessorService.proccessServiceCommand(appUser, text);
+        } */else {
+            output = commandProcessorService.proccessServiceCommand(appUser, text);
         }
 
         log.info("NODE: Text message is Received");
         var message = update.getMessage();
-        var sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId().toString());
-        sendMessage.setText(output);
-        producerService.produceAnswer(sendMessage);
+        sendAnswer(output, message.getChatId());
     }
 
-    private void sendAnswer(String output, Long chatId){
+    private void sendAnswer(String output, Long chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
         sendMessage.setText(output);
         producerService.produceAnswer(sendMessage);
-    }
-
-    private String processServiceCommand(AppUser appUser, String cmd) {
-        if(ServiceCommands.APPOINTMENT.equals(cmd)){
-            //TODO
-            return "Временно недоступно";
-        } else if (HELP.equals(cmd)) {
-            return help();
-        } else if (START.equals(cmd)) {
-            return "Чтобы посмотреть список доступных комманд введите /help";
-        } else {
-            return "Чтобы посмотреть список доступных комманд введите /help";
-        }
-    }
-
-    private String help() {
-        return "Список доступных команд:\n"
-                + "/cancel - отмена команды\n"
-                + "/start - начало работы с ботом\n"
-                + "/appointment - запись на занятие\n"
-                + "/info - вывод информации о пользователе, его записях и группах\n"
-                + "";
     }
 
     private String cancelProcess(AppUser appUser) {

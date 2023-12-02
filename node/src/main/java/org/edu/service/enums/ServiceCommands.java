@@ -8,6 +8,9 @@ public enum ServiceCommands {
     CANCEL("/cancel"),
     //инфа по группам, записям и т.д.
     INFO("/info"),
+    //создание активности админом или тренером
+    OCCUPATION("/occupation"),
+    AUTH("/auth"),
     START("/start");
     private final String cmd;
 
