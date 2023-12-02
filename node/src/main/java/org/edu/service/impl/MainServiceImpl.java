@@ -37,7 +37,7 @@ public class MainServiceImpl implements MainService {
         saveRawData(update);
         var appUser = findOrSaveAppuser(update);
         var text = update.getMessage().getText();
-        var output = "";
+        var output = "Hello from Node";
 
         if (CANCEL.equals(text)) {
             output = cancelProcess(appUser);
@@ -53,7 +53,7 @@ public class MainServiceImpl implements MainService {
         var message = update.getMessage();
         var sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId().toString());
-        sendMessage.setText("Hello from Node");
+        sendMessage.setText(output);
         producerService.produceAnswer(sendMessage);
     }
 
