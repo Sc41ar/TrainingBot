@@ -15,10 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.edu.entity.enums.UserState.ADMIN_STATE;
 import static org.edu.entity.enums.UserState.TEACHER_STATE;
@@ -42,7 +39,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
         //создание записи на занятие
         if (cmd.matches("^(/appointment)(.*)$")) {
             processAppointment(appUser, cmd);
-            return "Запись совершена";
+            return "";
         } else if (HELP.equals(cmd)) {
             return help(appUser);
         } else if (START.equals(cmd)) {
@@ -60,12 +57,21 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
     }
 
     private void processAppointment(AppUser appUser, String cmd) {
+        StringBuilder answer = new StringBuilder("List of occup:");
         if (cmd.matches("^(/appointment) ((0[1-9]|[12][0-9]|3[0-1])\\.(0[1-9]|1[0-2])\\.(202[3-9]):([01][0-9]|2[0-3])\\.([0-6][0-9]);\"(([a-zA-Zа-яА-Я _+@]+)*)\")$")) {
         } else if (cmd.matches("^(/appointment)(.*)$")) {
 
             var occupList = occupationDao.findAll(isNotExpired());
-
-            sendAnswer("List of occup:", appUser.getTelegramUserId());
+            HashSet<String> occupationNames = new HashSet<String>();
+            for (var item : occupList) {
+                occupationNames.add(item.getOccupationName());
+            }
+            int i = 1 ;
+            for (var item : occupationNames) {
+                answer.append("\n"+i+". "+item);
+                i++;
+            }
+            sendAnswer(answer.toString(), appUser.getTelegramUserId());
         }
     }
 
