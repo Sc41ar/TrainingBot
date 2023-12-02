@@ -11,13 +11,19 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.edu.entity.enums.UserState.ADMIN_STATE;
 import static org.edu.entity.enums.UserState.TEACHER_STATE;
 import static org.edu.service.enums.ServiceCommands.*;
+import static org.edu.specifications.OccupationSpecifications.isNotExpired;
 
 @Service
 @Log4j2
@@ -33,9 +39,10 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
 
     @Override
     public String proccessServiceCommand(AppUser appUser, String cmd) {
-        if (ServiceCommands.APPOINTMENT.equals(cmd)) {
-            //TODO
-            return "Временно недоступно";
+        //создание записи на занятие
+        if (cmd.matches("^(/appointment)(.*)$")) {
+            processAppointment(appUser, cmd);
+            return "Запись совершена";
         } else if (HELP.equals(cmd)) {
             return help(appUser);
         } else if (START.equals(cmd)) {
@@ -47,17 +54,19 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
         } else if (AUTH.equals(cmd)) {
             processAuth(appUser);
             return "OK";
-        }//создание записи на занятие
-        else if (cmd.matches("^(/appointment)(.*)$")) {
-            processAppointment(appUser, cmd);
-            return "Запись совершена";
         } else {
             return "Чтобы посмотреть список доступных комманд введите /help";
         }
     }
 
     private void processAppointment(AppUser appUser, String cmd) {
-        if(/*cmd.matches("^(/appointment) ()$")*/false);
+        if (cmd.matches("^(/appointment) ((0[1-9]|[12][0-9]|3[0-1])\\.(0[1-9]|1[0-2])\\.(202[3-9]):([01][0-9]|2[0-3])\\.([0-6][0-9]);\"(([a-zA-Zа-яА-Я _+@]+)*)\")$")) {
+        } else if (cmd.matches("^(/appointment)(.*)$")) {
+
+            var occupList = occupationDao.findAll(isNotExpired());
+
+            sendAnswer("List of occup:", appUser.getTelegramUserId());
+        }
     }
 
     private void processAuth(AppUser appUser) {

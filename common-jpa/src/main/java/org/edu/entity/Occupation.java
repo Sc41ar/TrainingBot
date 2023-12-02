@@ -19,6 +19,7 @@ public class Occupation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String occupationName;
+
     private Date date;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id")
