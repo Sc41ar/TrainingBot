@@ -43,12 +43,9 @@ public class MainServiceImpl implements MainService {
 
         if (CANCEL.equals(text)) {
             output = cancelProcess(appUser);
-        }/* else if (BASIC_STATE.equals(appUser)) {
-            output = commandProccessorService.proccessServiceCommand(appUser, text);
-        } */else {
+        } else {
             output = commandProcessorService.proccessServiceCommand(appUser, text);
         }
-
         log.info("NODE: Text message is Received");
         var message = update.getMessage();
         sendAnswer(output, message.getChatId());
@@ -72,13 +69,7 @@ public class MainServiceImpl implements MainService {
         User telegramUser = textMessage.getFrom();
         AppUser persistentAppUser = appUserDao.findAppUserByTelegramUserId(telegramUser.getId());
         if (persistentAppUser == null) {
-            AppUser transientAppUser = AppUser.builder()
-                    .telegramUserId(telegramUser.getId())
-                    .username(telegramUser.getUserName())
-                    .firstName(telegramUser.getFirstName())
-                    .lastName(telegramUser.getLastName())
-                    .state(BASIC_STATE)
-                    .build();
+            AppUser transientAppUser = AppUser.builder().telegramUserId(telegramUser.getId()).username(telegramUser.getUserName()).firstName(telegramUser.getFirstName()).lastName(telegramUser.getLastName()).state(BASIC_STATE).build();
             return appUserDao.save(transientAppUser);
         }
         return persistentAppUser;

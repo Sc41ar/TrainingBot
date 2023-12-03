@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Service
 @Log4j2
 public class UpdateProducerImpl implements UpdateProducer {
-    //логгирование на твой вкус TODO : интеграция с RAbbitMQ
     private final RabbitTemplate rabbitTemplate;
 
     public UpdateProducerImpl(RabbitTemplate rabbitTemplate) {
@@ -22,5 +21,6 @@ public class UpdateProducerImpl implements UpdateProducer {
         log.info(update.getMessage().getText()+" \\ ");
         rabbitTemplate.convertAndSend(rabbitQueue, update);
     }
+
 
 }

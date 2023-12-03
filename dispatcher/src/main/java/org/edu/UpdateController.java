@@ -33,39 +33,11 @@ public class UpdateController {
             log.error("Received update is null");
             return;
         }
-
-        if(update.getMessage() != null) {
-            distributeMessagesByType(update);
-        }else {
-            log.error("Received unsupported message type"+ "\n" + update);
-        }
-    }
-
-    private void distributeMessagesByType(Update update) {
-        var message = update.getMessage();
-        if(message.hasText()){
-            processTextMessage(update);
-        }else if (message.hasDocument()){
-            processDocMessage(update);
-        }else if (message.hasPhoto()){
-            processPhotoMessage(update);
-        }else{
-            setUnsupportedMessageTypeView(update);
-        }
+        processTextMessage(update);
     }
 
     private void processTextMessage(Update update) {
         updateProducer.produce(TEXT_MESSAGE_UPDATE, update);
-    }
-
-    private void processPhotoMessage(Update update) {
-        updateProducer.produce(PHOTO_MESSAGE_UPDATE, update);
-        setFileIsReceivedView(update);
-    }
-
-    private void processDocMessage(Update update) {
-        updateProducer.produce(DOC_MESSAGE_UPDATE, update);
-        setFileIsReceivedView(update);
     }
 
     private void setFileIsReceivedView(Update update) {
