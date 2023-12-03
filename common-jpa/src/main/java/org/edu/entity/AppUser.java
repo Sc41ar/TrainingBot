@@ -5,19 +5,20 @@ import lombok.*;
 import org.edu.entity.enums.UserState;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 //добавить поля для сохранения пол hbателя
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "app_user")
-public class AppUser {
+public class AppUser  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,10 +30,10 @@ public class AppUser {
     private String username;
     @Enumerated(EnumType.STRING)
     private UserState state;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "occupation_student",
-            joinColumns = @JoinColumn(name = "student_id"),
-            inverseJoinColumns = @JoinColumn(name = "occupation_id"))
-    private Set<Occupation> lessons;
+            joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "occupation_id", referencedColumnName = "id"))
+    private Set<Occupation> lessons = new HashSet<>();
 }

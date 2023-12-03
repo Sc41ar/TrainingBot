@@ -18,4 +18,10 @@ public class OccupationSpecifications{
             return criteriaBuilder.greaterThan(root.get(Occupation_.DATE), date);
         });
     }
+
+    public static Specification<Occupation> hasOccupationName(String name){
+        return ((root, query, criteriaBuilder) ->
+            criteriaBuilder.equal(root.<String>get(Occupation_.OCCUPATIONNAME), name)
+        );
+    }
 }

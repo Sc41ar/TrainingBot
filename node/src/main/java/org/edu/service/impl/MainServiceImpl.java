@@ -13,6 +13,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.HashSet;
+
 import static org.edu.entity.enums.UserState.*;
 import static org.edu.service.enums.ServiceCommands.*;
 

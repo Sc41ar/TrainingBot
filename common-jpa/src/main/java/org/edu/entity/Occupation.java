@@ -3,18 +3,19 @@ package org.edu.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "id")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "occupation_table")
-public class Occupation {
+public class Occupation implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,6 +25,7 @@ public class Occupation {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id")
     private AppUser teacher;
-    @ManyToMany(mappedBy = "lessons")
-    private Set<AppUser> participants;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE,
+            mappedBy = "lessons")
+    private Set<AppUser> participants = new HashSet<>();
 }

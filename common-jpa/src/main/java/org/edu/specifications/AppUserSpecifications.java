@@ -5,12 +5,12 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class AppUserSpecifications {
 
-    public static Specification<AppUser> hasFirstNameLike(String name){
+    public static Specification<AppUser> hasFirstName(String name){
         return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.<String>get("firstName"), "%" + name + "%"));
+                criteriaBuilder.equal(root.<String>get("firstName"), "%" + name + "%"));
     }
 
-    public static Specification<AppUser> hasLastNameLike(String name){
+    public static Specification<AppUser> hasLastName(String name){
         return((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.<String>get("lastName"), name));
     }
