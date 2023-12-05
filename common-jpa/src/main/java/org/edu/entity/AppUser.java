@@ -2,6 +2,7 @@ package org.edu.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.edu.entity.enums.BotState;
 import org.edu.entity.enums.UserState;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -30,6 +31,8 @@ public class AppUser  {
     private String username;
     @Enumerated(EnumType.STRING)
     private UserState state;
+    @Enumerated(EnumType.STRING)
+    private BotState botState;
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "occupation_student",
