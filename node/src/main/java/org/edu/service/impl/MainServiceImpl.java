@@ -5,6 +5,7 @@ import org.edu.dao.AppUserDao;
 import org.edu.dao.RawDataDao;
 import org.edu.entity.AppUser;
 import org.edu.entity.RawData;
+import org.edu.entity.enums.BotState;
 import org.edu.service.MainService;
 import org.edu.service.ProducerService;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-
-import java.util.HashSet;
 
 import static org.edu.entity.enums.UserState.*;
 import static org.edu.service.enums.ServiceCommands.*;
@@ -69,7 +68,15 @@ public class MainServiceImpl implements MainService {
         User telegramUser = textMessage.getFrom();
         AppUser persistentAppUser = appUserDao.findAppUserByTelegramUserId(telegramUser.getId());
         if (persistentAppUser == null) {
-            AppUser transientAppUser = AppUser.builder().telegramUserId(telegramUser.getId()).username(telegramUser.getUserName()).firstName(telegramUser.getFirstName()).lastName(telegramUser.getLastName()).state(BASIC_STATE).build();
+            AppUser transientAppUser = AppUser
+                    .builder()
+                    .telegramUserId(telegramUser.getId())
+                    .username(telegramUser.getUserName())
+                    .firstName(telegramUser.getFirstName())
+                    .lastName(telegramUser.getLastName())
+                    .state(BASIC_STATE)
+                    .botState(BotState.BASIC)
+                    .build();
             return appUserDao.save(transientAppUser);
         }
         return persistentAppUser;
