@@ -1,6 +1,6 @@
 package org.edu.service.impl;
 
-import org.edu.UpdateController;
+import org.edu.controller.UpdateController;
 import org.edu.service.AnswerConsumer;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;

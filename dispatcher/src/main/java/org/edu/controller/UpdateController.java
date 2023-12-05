@@ -1,4 +1,4 @@
-package org.edu;
+package org.edu.controller;
 
 import lombok.extern.log4j.Log4j2;
 import org.edu.controller.TelegramBot;
@@ -40,18 +40,6 @@ public class UpdateController {
         updateProducer.produce(TEXT_MESSAGE_UPDATE, update);
     }
 
-    private void setFileIsReceivedView(Update update) {
-         var sendMessge = messageUtils.generateSendMEssageWithText(update,
-                 "File is received. Processing");
-         setView(sendMessge);
-    }
-
-    //Пока не реагируем на ненужные нам сообщения отредактированные и т.д.
-    private void setUnsupportedMessageTypeView(Update update) {
-        var sendMessage = messageUtils.generateSendMEssageWithText(update,
-                "Unsupported message type");
-        setView(sendMessage);
-    }
 
     //Для сохранения вертикали вызовов. Возможность вызывать отправку сообщений из других модулей.
     //Также обеспечивает "стройность" класса бота
