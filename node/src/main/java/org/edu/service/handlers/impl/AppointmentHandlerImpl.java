@@ -52,6 +52,7 @@ public class AppointmentHandlerImpl implements AppointmentHandler {
         appUserDao.saveAndFlush(appUser);
         return answer.toString();
     }
+
     @Override
     public String parseAppointment(AppUser appUser, String string) {
         string = string.replaceAll("\"", "");
@@ -85,7 +86,7 @@ public class AppointmentHandlerImpl implements AppointmentHandler {
         return "Запись прошла";
     }
 
-    private void returnBasicState(AppUser appUser){
+    private void returnBasicState(AppUser appUser) {
         appUser.setBotState(BotState.BASIC);
         appUserDao.saveAndFlush(appUser);
     }

@@ -45,16 +45,18 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
     }
 
     @Override
-    public String proccessServiceCommand(AppUser appUser, String cmd) {
+    public String processServiceCommand(AppUser appUser, String cmd) {
         switch (appUser.getBotState()) {
             case AUTHENTICATION -> {
-               return  authHandler.showUnverifiedUsersList();
+                return authHandler.showUnverifiedUsersList();
+
 
             }
             case BASIC -> {
                 switch (cmd) {
                     case "/start" -> {
                         return "Чтобы посмотреть список доступных комманд введите /help";
+
                     }
                     case "/help" -> {
                         return help(appUser);
@@ -64,14 +66,15 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
                     }
                     case "/appointment" -> {
                         return appointmentHandler.processAppointment(appUser);
-                    }case "/occupation" -> {
+                    }
+                    case "/occupation" -> {
                         return occupationHandler.processOccupation(appUser);
-                    }case "/auth" ->{
+                    }
+                    case "/auth" -> {
                         return authHandler.processAuth(appUser);
                     }
 
                     default -> {
-
                         return "nuull";
                     }
                 }
@@ -107,6 +110,22 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
 //        } else {
 //            return "Чтобы посмотреть список доступных комманд введите /help";
 //        }
+    }
+
+    @Override
+    public String processCallBackQuery(AppUser appUser, String query) {
+        switch (query){
+            case "Подтвердить"->{
+
+            }
+            case "Отклонить"->{
+
+            }
+            default -> {
+
+            }
+        }
+        return "1";
     }
 
 

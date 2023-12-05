@@ -9,8 +9,11 @@ import org.edu.service.ProducerService;
 import org.edu.service.handlers.AuthHandler;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AuthHandlerImpl implements AuthHandler {
@@ -30,8 +33,15 @@ public class AuthHandlerImpl implements AuthHandler {
         long managerId = 5;
         var admin = appUserDao.findById(adminId);
         var manager = appUserDao.findById(managerId);
-        sendAnswer("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + " ожидает потверждения", admin.get().getTelegramUserId());
-        sendAnswer("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + " ожидает потверждения", manager.get().getTelegramUserId());
+        SendMessage message = new SendMessage();
+        message.setText("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + " ожидает потверждения");
+
+        InlineKeyboardMarkup markup = makeMarkup();
+        message.setReplyMarkup(markup);
+        message.setChatId(admin.get().getTelegramUserId());
+
+        sendAnswer(message);
+
         admin.get().setBotState(BotState.AUTHENTICATION);
         manager.get().setBotState(BotState.AUTHENTICATION);
         appUserDao.saveAndFlush(admin.get());
@@ -41,25 +51,44 @@ public class AuthHandlerImpl implements AuthHandler {
         return "Запрос на подтверждение личности отправлен";
     }
 
+    private InlineKeyboardMarkup makeMarkup() {
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+
+        InlineKeyboardButton buttonYes = new InlineKeyboardButton();
+        InlineKeyboardButton buttonNo = new InlineKeyboardButton();
+
+        buttonYes.setText("Подтвердить");
+        buttonNo.setText("Отклонить");
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(buttonYes);
+        row.add(buttonNo);
+
+        List<List<InlineKeyboardButton>> rowList = new ArrayList<>();
+        rowList.add(row);
+
+        markup.setKeyboard(rowList);
+        return markup;
+    }
+
     @Override
     public String showUnverifiedUsersList() {
         StringBuilder answer = new StringBuilder("");
         var list = authUserQueueDao.findAll();
-        int i  = 1;
+        int i = 1;
         for (var item : list) {
-            answer.append("\n" + i + ". " + item.getAppUser().getFirstName()+ " @"+item.getAppUser().getUsername());
+            answer.append("\n" + i + ". " + item.getAppUser().getFirstName() + " @" + item.getAppUser().getUsername());
             i++;
         }
         return answer.toString();
     }
 
-    private void sendAnswer(String output, Long chatId) {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(chatId);
-        sendMessage.setText(output);
-        producerService.produceAnswer(sendMessage);
+    private void sendAnswer(SendMessage message) {
+
+        producerService.produceAnswer(message);
     }
-    private void returnBasicState(AppUser appUser){
+
+    private void returnBasicState(AppUser appUser) {
         appUser.setBotState(BotState.BASIC);
         appUserDao.saveAndFlush(appUser);
     }

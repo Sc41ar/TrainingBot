@@ -40,10 +40,13 @@ public class MainServiceImpl implements MainService {
         var text = update.getMessage().getText();
         var output = "Hello from Node";
 
+        if(update.hasCallbackQuery())
+            commandProcessorService.processCallBackQuery(appUser, String.valueOf(update.getCallbackQuery()));
+
         if (CANCEL.equals(text)) {
             output = cancelProcess(appUser);
         } else {
-            output = commandProcessorService.proccessServiceCommand(appUser, text);
+            output = commandProcessorService.processServiceCommand(appUser, text);
         }
         log.info("NODE: Text message is Received");
         var message = update.getMessage();
