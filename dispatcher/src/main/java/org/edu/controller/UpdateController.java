@@ -1,7 +1,6 @@
 package org.edu.controller;
 
 import lombok.extern.log4j.Log4j2;
-import org.edu.controller.TelegramBot;
 import org.edu.service.UpdateProducer;
 import org.edu.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +8,13 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import static org.edu.model.RabbitQueue.*;
+import static org.edu.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
 
 @Component
 @Log4j2
 public class UpdateController {
-    private TelegramBot telegramBot;
     private final MessageUtils messageUtils;
+    private TelegramBot telegramBot;
     @Autowired
     private UpdateProducer updateProducer;
 
@@ -23,17 +22,18 @@ public class UpdateController {
         this.messageUtils = messageUtils;
     }
 
-    public void registerBot(TelegramBot bot){
+    public void registerBot(TelegramBot bot) {
         telegramBot = bot;
     }
 
 
-    public void processUpdate(Update update){
-        if(update == null){
+    public void processUpdate(Update update) {
+        if (update == null) {
             log.error("Received update is null");
             return;
         }
-        processTextMessage(update);
+        if (update.getPoll() == null && !update.getMessage().hasPhoto() && !update.getMessage().hasDocument() && update.getMessage().hasText())
+            processTextMessage(update);
     }
 
     private void processTextMessage(Update update) {
