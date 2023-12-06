@@ -3,6 +3,8 @@ package org.edu.service.impl;
 import lombok.extern.log4j.Log4j2;
 import org.edu.dao.AppUserDao;
 import org.edu.dao.OccupationDao;
+import org.edu.dao.SubscriptionRepository;
+import org.edu.entity.AppUser;
 import org.edu.service.ProducerService;
 import org.edu.service.ReminderService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,6 +13,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Log4j2
@@ -18,11 +22,13 @@ public class RemainderImpl implements ReminderService {
     private final ProducerService producerService;
     private final AppUserDao appUserDao;
     private final OccupationDao occupationDao;
+    private final SubscriptionRepository studentSubscriptionDao;
 
-    public RemainderImpl(ProducerService producerService, AppUserDao appUserDao, OccupationDao occupationDao) {
+    public RemainderImpl(ProducerService producerService, AppUserDao appUserDao, OccupationDao occupationDao, SubscriptionRepository studentSubscriptionDao) {
         this.producerService = producerService;
         this.appUserDao = appUserDao;
         this.occupationDao = occupationDao;
+        this.studentSubscriptionDao = studentSubscriptionDao;
     }
 
     @Override
@@ -43,6 +49,36 @@ public class RemainderImpl implements ReminderService {
             }
         }
         log.error("ded\n\n");
+    }
+
+    @Override
+    public void doAutoAppointmentString(Long occupationId) {
+        var occupationsOptional = occupationDao.findById(occupationId);
+        var occupation = occupationsOptional.get();
+        var occupations = occupationDao.findByOccupationNameOrderByDate(occupation.getOccupationName());
+        if (occupations == null || occupations.isEmpty()) {
+            return;
+        } else {
+            Set<AppUser> participants = new HashSet<>();
+            for (int i = 0; i < occupations.size(); i++) {
+                if (occupations.get(i).getParticipants() != null) {
+                    participants = occupations.get(i).getParticipants();
+                    break;
+                }
+            }
+            for (var user : participants) {
+                if (studentSubscriptionDao.findByStudentId(user.getId()) != null) {
+                    try {
+                        occupation.getParticipants().add(user);
+                        user.getLessons().add(occupation);
+                        appUserDao.saveAndFlush(user);
+                    } catch (Exception e) {
+                        log.error(e.getMessage() + "\t" + e.getCause());
+                    }
+                }
+            }
+        }
+
     }
 
     private void sendAnswer(String output, Long chatId) {

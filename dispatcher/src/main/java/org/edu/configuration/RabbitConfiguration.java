@@ -12,17 +12,27 @@ import static org.edu.model.RabbitQueue.*;
 public class RabbitConfiguration {
 
     @Bean
-    public MessageConverter jsonMessageConverter(){
+    public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
-    public Queue textMessageQueue(){
+    public Queue textMessageQueue() {
         return new Queue(TEXT_MESSAGE_UPDATE);
     }
 
     @Bean
-    public Queue answerMessageQueue(){
+    public Queue serviceQueryQueue() {
+        return new Queue(SERVICE_QUERY_QUEUE);
+    }
+
+    @Bean
+    public Queue serviceResponseQueue() {
+        return new Queue(SERVICE_RESPONSE_QUEUE);
+    }
+
+    @Bean
+    public Queue answerMessageQueue() {
         return new Queue(ANSWER_MESSAGE);
     }
 }

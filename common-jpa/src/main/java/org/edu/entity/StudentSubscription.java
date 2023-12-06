@@ -19,4 +19,5 @@ public class StudentSubscription {
     private AppUser student;
     @Column(name = "lessons_count")
     private int lessonsCount;
+
 }
