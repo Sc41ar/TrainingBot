@@ -1,5 +1,6 @@
 package org.edu.service.handlers.impl;
 
+import org.edu.dao.AuthUserQueueDao;
 import org.edu.dao.OccupationDao;
 import org.edu.entity.AppUser;
 import org.edu.service.handlers.InfoHandler;
@@ -13,13 +14,15 @@ import static org.edu.specifications.OccupationSpecifications.hasTeacherId;
 @Service
 public class InfoHandlerImpl implements InfoHandler {
     private final OccupationDao occupationDao;
+    private final AuthUserQueueDao authUserQueueDao;
 
-    public InfoHandlerImpl(OccupationDao occupationDao) {
+    public InfoHandlerImpl(OccupationDao occupationDao, AuthUserQueueDao authUserQueueDao) {
         this.occupationDao = occupationDao;
+        this.authUserQueueDao = authUserQueueDao;
     }
 
     @Override
-    public String  infoOutput(AppUser appUser) {
+    public String infoOutput(AppUser appUser) {
         var teacherAt = occupationDao.findAll(hasTeacherId(appUser));
         var studentAt = occupationDao.findAll(hasStudent(appUser));
         HashSet<String> occupationNames = new HashSet<String>();

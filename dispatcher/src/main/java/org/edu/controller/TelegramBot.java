@@ -18,11 +18,11 @@ import java.util.ArrayList;
 @Log4j2
 public class TelegramBot extends TelegramLongPollingBot {
 
+    private final UpdateController updateController;
     @Value("${bot.name}")
     private String botName;
     @Value("${bot.token}")
     private String botToken;
-    private final UpdateController updateController;
 
 
     public TelegramBot(UpdateController updateController) {
@@ -31,7 +31,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         updateController.registerBot(this);
         ArrayList<BotCommand> commandArrayList = new ArrayList<>();
         commandArrayList.add(new BotCommand("/help", "Получить справку по командам бота"));
@@ -39,10 +39,12 @@ public class TelegramBot extends TelegramLongPollingBot {
         commandArrayList.add(new BotCommand("/cancel", "Отмена текущей операции"));
         commandArrayList.add(new BotCommand("/occupation", "Запись информации о занятии"));
         commandArrayList.add(new BotCommand("/appointment", "Запись на занятие"));
-        commandArrayList.add(new BotCommand("/info","Вывод информации о пользователе, его группах и записях"));
+        commandArrayList.add(new BotCommand("/info", "Вывод информации о пользователе, его группах и записях"));
         commandArrayList.add(new BotCommand("/auth", "Запрос на подтверждение личности"));
+        commandArrayList.add(new BotCommand("/unverified_list", "Список пользователей, ожидающих подтверждений"));
+        commandArrayList.add(new BotCommand("/get_state", "Выводит состояние бота"));
         try {
-            this.execute(new SetMyCommands(commandArrayList, new BotCommandScopeDefault(), null   ));
+            this.execute(new SetMyCommands(commandArrayList, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
             log.error(e.getMessage());
         }
@@ -63,12 +65,12 @@ public class TelegramBot extends TelegramLongPollingBot {
         updateController.processUpdate(update);
     }
 
-    public void sendAnswerMessage(SendMessage message){
-        if(message != null){
+    public void sendAnswerMessage(SendMessage message) {
+        if (message != null) {
             try {
                 execute(message);
             } catch (TelegramApiException e) {
-                log.error(e.getMessage()+ "\n" + e.getCause());
+                log.error(e.getMessage() + "\n" + e.getCause());
             }
         }
     }

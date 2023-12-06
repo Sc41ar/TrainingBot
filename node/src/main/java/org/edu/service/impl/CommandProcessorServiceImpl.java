@@ -5,6 +5,7 @@ import org.edu.dao.AppUserDao;
 import org.edu.dao.OccupationDao;
 import org.edu.entity.AppUser;
 import org.edu.entity.Occupation;
+import org.edu.entity.enums.BotState;
 import org.edu.service.CommandProcessorService;
 import org.edu.service.ProducerService;
 import org.edu.service.handlers.AppointmentHandler;
@@ -13,6 +14,7 @@ import org.edu.service.handlers.InfoHandler;
 import org.edu.service.handlers.OccupationHandler;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,87 +47,90 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
     }
 
     @Override
-    public String processServiceCommand(AppUser appUser, String cmd) {
+    public SendMessage processServiceCommand(AppUser appUser, String cmd) {
+        SendMessage answer = new SendMessage();
+        answer.setChatId(appUser.getTelegramUserId());
+        if (cmd == null) {
+            answer.setText("");
+        }
+        if (cmd.equals("/get_state")) {
+            answer.setText(appUser.getBotState().name());
+        }
         switch (appUser.getBotState()) {
             case AUTHENTICATION -> {
-                return authHandler.showUnverifiedUsersList();
-
-
+                if (cmd != null && !cmd.isEmpty()) {
+                    var username = authHandler.getUsernameFromCallBackQueryMessage(cmd);
+                    authHandler.setUserTeacherState(username);
+                    authHandler.returnBasicState(appUser);
+                    answer.setText("");
+                }
+                String answerString = authHandler.showUnverifiedUsersList(appUser);
+                answer.setText(answerString);
             }
             case BASIC -> {
                 switch (cmd) {
                     case "/start" -> {
-                        return "Чтобы посмотреть список доступных комманд введите /help";
+                        answer.setText("Чтобы посмотреть список доступных комманд введите /help");
 
                     }
                     case "/help" -> {
-                        return help(appUser);
+                        answer.setText(help(appUser));
                     }
                     case "/info" -> {
-                        return infoHandler.infoOutput(appUser);
+                        answer.setText(infoHandler.infoOutput(appUser));
                     }
                     case "/appointment" -> {
-                        return appointmentHandler.processAppointment(appUser);
+                        answer.setText(appointmentHandler.processAppointment(appUser));
                     }
                     case "/occupation" -> {
-                        return occupationHandler.processOccupation(appUser);
+                        answer.setText(occupationHandler.processOccupation(appUser));
                     }
                     case "/auth" -> {
-                        return authHandler.processAuth(appUser);
+                        answer.setText(authHandler.processAuth(appUser));
+                    }
+                    case "/unverified_list" -> {
+                        appUser.setBotState(BotState.AUTHENTICATION);
+                        appUserDao.saveAndFlush(appUser);
+                        answer.setText(authHandler.showUnverifiedUsersList(appUser));
+
                     }
 
+
                     default -> {
-                        return "nuull";
+                        answer.setText("nuulll");
                     }
                 }
             }
             case APPOINTMENT -> {
-                return appointmentHandler.parseAppointment(appUser, cmd);
+                answer.setText(appointmentHandler.parseAppointment(appUser, cmd));
             }
             case OCCUPATION -> {
-                return occupationHandler.parseOccupatin(appUser, cmd);
+                answer.setText(occupationHandler.parseOccupatin(appUser, cmd));
             }
             default -> {
-                return "ошибка";
+                answer.setText("Ошибка");
             }
         }
-        //создание записи на занятие
-//        if (cmd.matches("^(/appointment)(.*)$")) {
-//            processAppointment(appUser, cmd);
-//            return "";
-//        } else if (HELP.equals(cmd)) {
-//            return help(appUser);
-//        } else if (START.equals(cmd)) {
-//            return "Чтобы посмотреть список доступных комманд введите /help";
-//        } //Создание занятия
-//        else if (cmd.matches("^(/occupation)(.*)$")) {
-//            processOccupation(appUser, cmd);
-//            return "";
-//        } else if (AUTH.equals(cmd)) {
-//            processAuth(appUser);
-//            return "";
-//        } else if (INFO.equals(cmd)) {
-//            infoOutput(appUser);
-//            return "";
-//        } else {
-//            return "Чтобы посмотреть список доступных комманд введите /help";
-//        }
+        return answer;
     }
 
     @Override
-    public String processCallBackQuery(AppUser appUser, String query) {
-        switch (query){
-            case "Подтвердить"->{
-
+    public String processCallBackQuery(CallbackQuery query, AppUser appUser) {
+        switch (query.getData()) {
+            case "Подтвердить" -> {
+                var username = authHandler.getUsernameFromCallBackQueryMessage(query.getMessage().getText());
+                authHandler.setUserTeacherState(username);
+                authHandler.returnBasicState(appUser);
+                return "Потвержден";
             }
-            case "Отклонить"->{
-
+            case "Отклонить" -> {
+                authHandler.returnBasicState(appUser);
+                return "Отклонен";
             }
             default -> {
-
+                return "Ошибка";
             }
         }
-        return "1";
     }
 
 

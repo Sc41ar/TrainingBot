@@ -14,8 +14,9 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-import static org.edu.entity.enums.UserState.*;
-import static org.edu.service.enums.ServiceCommands.*;
+import static org.edu.entity.enums.UserState.ADMIN_STATE;
+import static org.edu.entity.enums.UserState.BASIC_STATE;
+import static org.edu.service.enums.ServiceCommands.CANCEL;
 
 @Service
 @Log4j2
@@ -36,21 +37,32 @@ public class MainServiceImpl implements MainService {
     @Override
     public void proccessTextMessage(Update update) {
         saveRawData(update);
-        var appUser = findOrSaveAppuser(update);
-        var text = update.getMessage().getText();
+        AppUser appUser;
         var output = "Hello from Node";
-
-        if(update.hasCallbackQuery())
-            commandProcessorService.processCallBackQuery(appUser, String.valueOf(update.getCallbackQuery()));
-
-        if (CANCEL.equals(text)) {
-            output = cancelProcess(appUser);
+        Long chatId;
+        if (update.hasCallbackQuery()) {
+            appUser = appUserDao.findAppUserByTelegramUserId(update.getCallbackQuery().getFrom().getId());
+            chatId = appUser.getTelegramUserId();
+            output = commandProcessorService.processCallBackQuery(update.getCallbackQuery(), appUser);
+            return;
         } else {
-            output = commandProcessorService.processServiceCommand(appUser, text);
+            appUser = findOrSaveAppuser(update.getMessage());
+            chatId = appUser.getTelegramUserId();
+            var text = update.getMessage().getText();
+
+            if (CANCEL.equals(text)) {
+                output = cancelProcess(appUser);
+            } else {
+                sendAnswer(commandProcessorService.processServiceCommand(appUser, text));
+            }
         }
+
         log.info("NODE: Text message is Received");
-        var message = update.getMessage();
-        sendAnswer(output, message.getChatId());
+        sendAnswer(output, chatId);
+    }
+
+    private void sendAnswer(SendMessage sendMessage) {
+        producerService.produceAnswer(sendMessage);
     }
 
     private void sendAnswer(String output, Long chatId) {
@@ -66,9 +78,8 @@ public class MainServiceImpl implements MainService {
         return "Командa отменена";
     }
 
-    private AppUser findOrSaveAppuser(Update update) {
-        Message textMessage = update.getMessage();
-        User telegramUser = textMessage.getFrom();
+    private AppUser findOrSaveAppuser(Message message) {
+        User telegramUser = message.getFrom();
         AppUser persistentAppUser = appUserDao.findAppUserByTelegramUserId(telegramUser.getId());
         if (persistentAppUser == null) {
             AppUser transientAppUser = AppUser

@@ -46,9 +46,21 @@ public class OccupationHandlerImpl implements OccupationHandler {
         return answer.toString();
     }
 
+
+//
+//    private InlineKeyboardMarkup makeMarkup(){
+//        InlineKeyboardMarkup
+//    }
+
     @Override
     public String parseOccupatin(AppUser appUser, String string) {
+        var singleAppointmentRegexCheck = string.matches("(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[0-2])\\.(202[3-9]|203[0-9]):([01][0-9]|2[0-4])\\.([0-5][0-9]) ([a-zA-Zа-яА-Я0-9]+)");
+
         try {
+            if (!singleAppointmentRegexCheck) {
+                return "Неверный формат";
+            }
+
             string = string.replaceAll("\"", "");
             ArrayList<String> subStrings = new ArrayList<String>(List.of(string.split(" |;")));
             subStrings.removeIf(String::isEmpty);
