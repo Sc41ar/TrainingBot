@@ -4,25 +4,18 @@ import lombok.extern.log4j.Log4j2;
 import org.edu.dao.AppUserDao;
 import org.edu.dao.OccupationDao;
 import org.edu.entity.AppUser;
-import org.edu.entity.Occupation;
 import org.edu.entity.enums.BotState;
 import org.edu.service.CommandProcessorService;
 import org.edu.service.ProducerService;
-import org.edu.service.handlers.AppointmentHandler;
-import org.edu.service.handlers.AuthHandler;
-import org.edu.service.handlers.InfoHandler;
-import org.edu.service.handlers.OccupationHandler;
+import org.edu.service.handlers.*;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
 import static org.edu.entity.enums.UserState.ADMIN_STATE;
 import static org.edu.entity.enums.UserState.TEACHER_STATE;
-import static org.edu.specifications.OccupationSpecifications.isNotExpired;
+import static org.edu.service.cons.ParseUtils.FORMAT_REGEX;
+import static org.edu.specifications.OccupationSpecifications.hasOccupationNameAndDate;
 
 @Service
 @Log4j2
@@ -35,8 +28,11 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
     private final AppointmentHandler appointmentHandler;
     private final OccupationHandler occupationHandler;
     private final AuthHandler authHandler;
+    private final JournalHandler journalHandler;
 
-    public CommandProcessorServiceImpl(ProducerService producerService, OccupationDao occupationDao, AppUserDao appUserDao, InfoHandler infoHandler, AppointmentHandler appointmentHandler, OccupationHandler occupationHandler, AuthHandler authHandler) {
+    private Long cachedId;
+
+    public CommandProcessorServiceImpl(ProducerService producerService, OccupationDao occupationDao, AppUserDao appUserDao, InfoHandler infoHandler, AppointmentHandler appointmentHandler, OccupationHandler occupationHandler, AuthHandler authHandler, JournalHandler journalHandler) {
         this.producerService = producerService;
         this.occupationDao = occupationDao;
         this.appUserDao = appUserDao;
@@ -44,6 +40,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
         this.appointmentHandler = appointmentHandler;
         this.occupationHandler = occupationHandler;
         this.authHandler = authHandler;
+        this.journalHandler = journalHandler;
     }
 
     @Override
@@ -84,7 +81,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
                         return (appointmentHandler.processAppointment(appUser));
                     }
                     case "/occupation" -> {
-                        answer.setText(occupationHandler.processOccupation(appUser));
+                        answer.setText(occupationHandler.initOccupation(appUser));
                     }
                     case "/auth" -> {
                         answer.setText(authHandler.processAuth(appUser));
@@ -95,18 +92,48 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
                         answer.setText(authHandler.showUnverifiedUsersList(appUser));
 
                     }
-
-
+                    case "/journal" -> {
+                        journalHandler.setAddJournalState(appUser);
+                        answer.setText("Введите список посещений: ");
+                    }
                     default -> {
                         answer.setText("nuulll");
                     }
+                }
+            }
+            case JOURNALING -> {
+                switch (cmd) {
+                    case "exit", "выход", "quit", "q", "e" -> {
+                        answer.setText("выход из сервиса журнала");
+                        journalHandler.removeJournalingState(appUser);
+//TODO
+                    }
+                    default -> {
+                        answer.setText(journalHandler.processJournaling(cmd, cachedId));
+//TODO
+                    }
+                }
+            }
+            case ADDJOURNAL -> {
+                var check = cmd.matches(FORMAT_REGEX);
+                if (check) {
+                    var parsedOcc = occupationHandler.parseOccupation(cmd);
+                    var name = parsedOcc.getOccupationName();
+                    var lissOcc = occupationDao.findAll(hasOccupationNameAndDate(name, parsedOcc.getDate()));
+//                    var check_ = a.get(9).equals(parsedOcc.getOccupationName());
+                    var occ = lissOcc.get(0);
+                    cachedId = occ.getId();
+                    journalHandler.setJournalingState(appUser);
+                }
+                if (cachedId == null) {
+                    answer.setText("Ошибка ввода");
                 }
             }
             case APPOINTMENT -> {
                 answer.setText(appointmentHandler.parseAppointment(appUser, cmd));
             }
             case OCCUPATION -> {
-                answer.setText(occupationHandler.parseOccupatin(appUser, cmd));
+                answer.setText(occupationHandler.processOccupatin(appUser, cmd));
             }
             default -> {
                 answer.setText("Ошибка");
@@ -174,25 +201,6 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
             }
         }
         return sendMessage;
-    }
-
-
-    private boolean isThereOccupationThatMatchesDate(Date date) {
-        ArrayList<Occupation> occupationArrayList = new ArrayList<Occupation>(occupationDao.findAll(isNotExpired()));
-        for (var item : occupationArrayList) {
-            if (date.equals(item.getDate())) return true;
-        }
-        return false;
-    }
-
-    private Date parseDate(String stDate) {
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy:HH.mm");
-            return format.parse(stDate);
-        } catch (Exception e) {
-            log.error(e.getMessage() + "\n\t\t" + e.getCause());
-            return new Date();
-        }
     }
 
     private void sendAnswer(String output, Long chatId) {

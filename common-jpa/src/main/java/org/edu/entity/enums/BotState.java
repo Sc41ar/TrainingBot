@@ -4,6 +4,7 @@ public enum BotState {
     BASIC,
     AUTHENTICATION,
     OCCUPATION,
-
+    JOURNALING,
+    ADDJOURNAL,
     APPOINTMENT
 }

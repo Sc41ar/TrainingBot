@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static org.edu.entity.enums.UserState.ADMIN_STATE;
 import static org.edu.entity.enums.UserState.TEACHER_STATE;
+import static org.edu.service.cons.ParseUtils.FORMAT_REGEX;
 import static org.edu.specifications.OccupationSpecifications.isNotExpired;
 
 @Log4j2
@@ -34,7 +34,7 @@ public class OccupationHandlerImpl implements OccupationHandler {
 
 
     @Override
-    public String processOccupation(AppUser appUser) {
+    public String initOccupation(AppUser appUser) {
         boolean rightsCheck = appUser.getState() == TEACHER_STATE || appUser.getState() == ADMIN_STATE;
         StringBuilder answer = new StringBuilder("");
         if (rightsCheck) {
@@ -50,48 +50,53 @@ public class OccupationHandlerImpl implements OccupationHandler {
     }
 
     @Override
-    public String parseOccupatin(AppUser appUser, String string) {
-        var singleAppointmentRegexCheck = string.matches("(0?[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[0-2])\\.(202[3-9]|203[0-9]):([01][0-9]|2[0-4])\\.([0-5][0-9]) ([a-zA-Zа-яА-Я0-9 ]+)");
+    public String processOccupatin(AppUser appUser, String string) {
+        var singleAppointmentRegexCheck = string.matches(FORMAT_REGEX);
 
+        if (!singleAppointmentRegexCheck) {//questionable
+            return "Error format";
+        }
+        var parsedOccupation = parseOccupation(string);
+        if (parsedOccupation != null) {
+            if (isThereOccupationThatMatchesDate(parsedOccupation.getDate())) {
+                returnBasicState(appUser);
+                return "В это время уже есть занятие";
+            }
+            saveOccupationToDb(parsedOccupation);
+            returnBasicState(appUser);
+            return "Успешно ";
+        } else {
+            returnBasicState(appUser);
+            return "ошибка записи";
+        }
+    }
+
+    @Override
+    public Occupation parseOccupation(String string) {
         try {
-            if (!singleAppointmentRegexCheck) {
-
-                returnBasicState(appUser);
-                return "Неверный формат";
-            }
-
             string = string.replaceAll("\"", "");
-            ArrayList<String> subStrings = new ArrayList<String>(List.of(string.split(" |;")));
-            subStrings.removeIf(String::isEmpty);
+            var firstSpaceIndex = string.indexOf(' ');
+            var stringDate = string.substring(0, firstSpaceIndex);
+            var name = string.substring(firstSpaceIndex);
 
-            if (subStrings.size() < 2) {
-                log.error(string + "Ошибка прочтения данных");
-                returnBasicState(appUser);
-                return "Ошибка чтения данных";
-            }
+            Date parsedDate = parseDate(stringDate);
 
-            Date parsedDate = parseDate(subStrings.get(0));
-            StringBuilder name = new StringBuilder();
-            for (int i = 1; i < subStrings.size(); i++) {
-                name.append(subStrings.get(i));
-                if (i + 1 < subStrings.size())
-                    name.append(" ");
-            }
-
-            if (isThereOccupationThatMatchesDate(parsedDate)) return "В это время уже есть занятие";
-
-            Occupation occupation = Occupation.builder().occupationName(name.toString()).date(parsedDate).teacher(appUser).build();
-            occupationDao.save(occupation);
-            Occupation occupationWithId = occupationDao.findByOccupationNameAndDate(occupation.getOccupationName(), occupation.getDate());
-            producerService.produceMessage(occupationWithId.getId());
+            return Occupation.builder().occupationName(name).date(parsedDate).build();
 
         } catch (Exception e) {
             log.error(e.getMessage() + "\n" + e.getCause());
-            returnBasicState(appUser);
-            return "Ошибка чтения";
+            return null;
         }
-        returnBasicState(appUser);
-        return "Запись сделана\uD83D\uDC4D";
+    }
+
+    private void saveOccupationToDb(Occupation occupation) {
+        try {
+            occupationDao.save(occupation);
+            Occupation occupationWithId = occupationDao.findByOccupationNameAndDate(occupation.getOccupationName(), occupation.getDate());
+            producerService.produceMessage(occupationWithId.getId());
+        } catch (Exception e) {
+            log.info(e.getMessage() + "\t" + e.getCause());
+        }
     }
 
     private void returnBasicState(AppUser appUser) {
@@ -101,11 +106,12 @@ public class OccupationHandlerImpl implements OccupationHandler {
 
     private boolean isThereOccupationThatMatchesDate(Date date) {
         ArrayList<Occupation> occupationArrayList = new ArrayList<Occupation>(occupationDao.findAll(isNotExpired()));
-        for (var item : occupationArrayList) {
+        for (Occupation item : occupationArrayList) {
             if (date.equals(item.getDate())) return true;
         }
         return false;
     }
+
 
     private Date parseDate(String stDate) {
         try {
