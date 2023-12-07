@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface SubscriptionRepository extends JpaRepository<StudentSubscription, Long> {
     Optional<StudentSubscription> findById(Long id);
+
+    StudentSubscription findByStudentId(Long id);
 }

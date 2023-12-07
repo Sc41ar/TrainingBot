@@ -38,27 +38,19 @@ public class MainServiceImpl implements MainService {
     public void proccessTextMessage(Update update) {
         saveRawData(update);
         AppUser appUser;
-        var output = "Hello from Node";
-        Long chatId;
         if (update.hasCallbackQuery()) {
             appUser = appUserDao.findAppUserByTelegramUserId(update.getCallbackQuery().getFrom().getId());
-            chatId = appUser.getTelegramUserId();
-            output = commandProcessorService.processCallBackQuery(update.getCallbackQuery(), appUser);
-            return;
+            sendAnswer(commandProcessorService.processCallBackQuery(update.getCallbackQuery(), appUser));
         } else {
             appUser = findOrSaveAppuser(update.getMessage());
-            chatId = appUser.getTelegramUserId();
             var text = update.getMessage().getText();
 
             if (CANCEL.equals(text)) {
-                output = cancelProcess(appUser);
+                //TODO
             } else {
                 sendAnswer(commandProcessorService.processServiceCommand(appUser, text));
             }
         }
-
-        log.info("NODE: Text message is Received");
-        sendAnswer(output, chatId);
     }
 
     private void sendAnswer(SendMessage sendMessage) {

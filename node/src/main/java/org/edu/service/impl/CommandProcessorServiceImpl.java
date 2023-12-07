@@ -55,6 +55,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
         }
         if (cmd.equals("/get_state")) {
             answer.setText(appUser.getBotState().name());
+            return answer;
         }
         switch (appUser.getBotState()) {
             case AUTHENTICATION -> {
@@ -80,7 +81,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
                         answer.setText(infoHandler.infoOutput(appUser));
                     }
                     case "/appointment" -> {
-                        answer.setText(appointmentHandler.processAppointment(appUser));
+                        return (appointmentHandler.processAppointment(appUser));
                     }
                     case "/occupation" -> {
                         answer.setText(occupationHandler.processOccupation(appUser));
@@ -115,22 +116,58 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
     }
 
     @Override
-    public String processCallBackQuery(CallbackQuery query, AppUser appUser) {
+    public SendMessage processCallBackQuery(CallbackQuery query, AppUser appUser) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(appUser.getTelegramUserId());
         switch (query.getData()) {
             case "Подтвердить" -> {
                 var username = authHandler.getUsernameFromCallBackQueryMessage(query.getMessage().getText());
                 authHandler.setUserTeacherState(username);
                 authHandler.returnBasicState(appUser);
-                return "Потвержден";
+                sendMessage.setText("Потвержден");
             }
             case "Отклонить" -> {
                 authHandler.returnBasicState(appUser);
-                return "Отклонен";
+                sendMessage.setText("Отклонен");
+            }
+            case "single", "trial" -> {
+                appointmentHandler.saveSubsCapacity(appUser, 1);
+                sendMessage.setText("Выбрано пробное занятие\nВведите дату и нзвание группы");
+            }
+            case "subscription" -> {
+                sendMessage = appointmentHandler.chooseSubscriptionPlan(appUser);
+
+            }
+            case "four" -> {
+                var count = 4;
+                appointmentHandler.saveSubsCapacity(appUser, count);
+                sendMessage.setText("Выбрано " + count + " занятия");
+            }
+            case "eight" -> {
+                var count = 8;
+                appointmentHandler.saveSubsCapacity(appUser, count);
+                sendMessage.setText("Выбрано " + count + " занятия");
+            }
+            case "twelve" -> {
+                var count = 12;
+                appointmentHandler.saveSubsCapacity(appUser, count);
+                sendMessage.setText("Выбрано " + count + " занятия");
+            }
+            case "twenty" -> {
+                var count = 20;
+                appointmentHandler.saveSubsCapacity(appUser, count);
+                sendMessage.setText("Выбрано " + count + " занятия");
+            }
+            case "forty" -> {
+                var count = 40;
+                appointmentHandler.saveSubsCapacity(appUser, count);
+                sendMessage.setText("Выбрано " + count + " занятия");
             }
             default -> {
-                return "Ошибка";
+                sendMessage.setText("Ошибка");
             }
         }
+        return sendMessage;
     }
 
 

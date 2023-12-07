@@ -7,5 +7,5 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 public interface CommandProcessorService {
     public SendMessage processServiceCommand(AppUser appUser, String cmd);
 
-    public String processCallBackQuery(CallbackQuery query, AppUser appUser);
+    public SendMessage processCallBackQuery(CallbackQuery query, AppUser appUser);
 }
