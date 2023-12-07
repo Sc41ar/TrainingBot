@@ -93,7 +93,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
 
                     }
                     case "/journal" -> {
-                        if (appUser.getState().equals(TEACHER_STATE) || appUser.getState().equals(ADMIN_STATE)) {
+                        if (appUser.getState().equals(ADMIN_STATE)) {
 
                             journalHandler.setAddJournalState(appUser);
                             answer.setText("Введите список посещений: ");
@@ -218,9 +218,20 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
 
     private String help(AppUser appUser) {
         if (appUser.getState().equals(TEACHER_STATE) || appUser.getState().equals(ADMIN_STATE)) {
-            return "Список доступных команд:\n" + "/cancel - отмена команды\n" + "/start - начало работы с ботом\n" + "/appointment - запись на занятие\n" + "/info - вывод информации о пользователе, его записях и группах\n" + "/occupation - добавить в бота информацию о предстоящем занятии\n";
+            return "Список доступных команд:\n" +
+                    "/cancel - отмена команды\n" +
+                    "/start - начало работы с ботом\n" + "/appointment - запись на занятие\n" +
+                    "/info - вывод информации о пользователе, его записях и группах\n" + "/occupation - добавить в бота информацию о предстоящем занятии\n"+"/auth - запрос на подтверждение личности\n" +
+                    "/get_state - вывод состояния бота\n"
+                    +"/journal - сервис журнала занятий\n"
+                    +"/unverified_list - вывод пользователей, ожидающих подтверждения\n";
         } else {
-            return "Список доступных команд:\n" + "/cancel - отмена команды\n" + "/start - начало работы с ботом\n" + "/appointment - запись на занятие\n" + "/info - вывод информации о пользователе, его записях и группах\n";
+            return "Список доступных команд:\n" +
+                    "/cancel - отмена команды\n" +
+                    "/start - начало работы с ботом\n" + "/appointment - запись на занятие\n" +
+                    "/info - вывод информации о пользователе, его записях и группах\n"
+                    +"/auth - запрос на подтверждение личности\n" +
+                    "/get_state - вывод состояния бота\n";
         }
     }
 }
