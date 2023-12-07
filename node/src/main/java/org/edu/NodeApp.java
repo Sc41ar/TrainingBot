@@ -6,7 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-//микросервис, взаимодействующий с брокером
+//микросервис, занимающийся обработкой сообщения, большинство работы с БД
 @SpringBootApplication
 @PropertySource("classpath:application.properties")
 public class NodeApp {

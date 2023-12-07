@@ -1,5 +1,6 @@
 package org.edu.model;
 
+//Константы с названиями очередей брокеров
 public class RabbitQueue {
     public static final String TEXT_MESSAGE_UPDATE = "text_message_update";
 

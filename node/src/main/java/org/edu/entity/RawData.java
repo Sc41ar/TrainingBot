@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.Type;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+//сущность для записьи сообщения
 @Getter
 @Setter
 @EqualsAndHashCode(exclude = "id")

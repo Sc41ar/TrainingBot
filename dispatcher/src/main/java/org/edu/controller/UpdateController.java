@@ -12,6 +12,7 @@ import static org.edu.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
 
 @Component
 @Log4j2
+//Контроллер, который получает обновления от бота
 public class UpdateController {
     private final MessageUtils messageUtils;
     private TelegramBot telegramBot;
@@ -21,21 +22,21 @@ public class UpdateController {
     public UpdateController(MessageUtils messageUtils) {
         this.messageUtils = messageUtils;
     }
-
+    //сеттер
     public void registerBot(TelegramBot bot) {
         telegramBot = bot;
     }
 
-
+    //обработчик обновлений из бота
     public void processUpdate(Update update) {
         if (update == null) {
             log.error("Received update is null");
             return;
-        }
+        }//Защита от
         if (update.getPoll() == null && !update.getMessage().hasPhoto() && !update.getMessage().hasDocument() && update.getMessage().hasText())
             processTextMessage(update);
     }
-
+    //вызов сервиса отправителя
     private void processTextMessage(Update update) {
         updateProducer.produce(TEXT_MESSAGE_UPDATE, update);
     }

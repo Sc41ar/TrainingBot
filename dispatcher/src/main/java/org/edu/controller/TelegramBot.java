@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 
+//сам класс бота, лонгПолл вероятно временно
 @Component
 @Log4j2
 public class TelegramBot extends TelegramLongPollingBot {
@@ -43,6 +44,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         commandArrayList.add(new BotCommand("/auth", "Запрос на подтверждение личности"));
         commandArrayList.add(new BotCommand("/unverified_list", "Список пользователей, ожидающих подтверждений"));
         commandArrayList.add(new BotCommand("/get_state", "Выводит состояние бота"));
+        commandArrayList.add(new BotCommand("/journal", "Ведение журнала"));
         try {
             this.execute(new SetMyCommands(commandArrayList, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {

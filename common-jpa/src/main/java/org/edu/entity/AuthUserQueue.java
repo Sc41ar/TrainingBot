@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "auth_user_queue")
+@Table(name = "auth_user_queue")//очередь с пользователями на подтверждение
 public class AuthUserQueue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

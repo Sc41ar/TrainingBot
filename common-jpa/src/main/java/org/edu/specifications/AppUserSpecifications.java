@@ -4,6 +4,7 @@ import org.edu.entity.AppUser;
 import org.edu.entity.enums.UserState;
 import org.springframework.data.jpa.domain.Specification;
 
+//Запросы-Спецификации для пользователя
 public class AppUserSpecifications {
 
     public static Specification<AppUser> hasFirstName(String name) {

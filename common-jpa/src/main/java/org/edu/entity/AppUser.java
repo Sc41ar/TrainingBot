@@ -23,17 +23,20 @@ public class AppUser implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //id пользователя в БД телеграма
     private Long telegramUserId;
     @CreationTimestamp
+    //дат первого входа
     private LocalDateTime firstLoginDate;
+    //заполняется из профиля телегарма
     private String firstName;
     private String lastName;
     private String username;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)//перечисление возможных состояний/ролей пользователя
     private UserState state;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)//возможные состояния бота для каждого пользователя
     private BotState botState;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)//Сет с уроками, на которые пользователь записан
     @JoinTable(
             name = "occupation_student",
             joinColumns = @JoinColumn(name = "student_id", referencedColumnName = "id"),

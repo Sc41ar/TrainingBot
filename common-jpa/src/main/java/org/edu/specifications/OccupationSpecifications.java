@@ -11,6 +11,8 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Set;
 
+//запросы-спецификации
+
 public class OccupationSpecifications {
     public static Specification<Occupation> isNotExpired() {
         return ((root, query, criteriaBuilder) -> {

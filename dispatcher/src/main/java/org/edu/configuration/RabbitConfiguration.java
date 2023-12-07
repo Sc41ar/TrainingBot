@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.edu.model.RabbitQueue.*;
-
+//создание бинов с очередями + конвертер сообщений
 @Configuration
 public class RabbitConfiguration {
 

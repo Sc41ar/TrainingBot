@@ -93,8 +93,13 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
 
                     }
                     case "/journal" -> {
-                        journalHandler.setAddJournalState(appUser);
-                        answer.setText("Введите список посещений: ");
+                        if (appUser.getState().equals(TEACHER_STATE) || appUser.getState().equals(ADMIN_STATE)) {
+
+                            journalHandler.setAddJournalState(appUser);
+                            answer.setText("Введите список посещений: ");
+                        }
+                        answer.setText("Недостаточно прав");
+                        break;
                     }
                     default -> {
                         answer.setText("nuulll");
@@ -138,6 +143,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
             default -> {
                 answer.setText("Ошибка");
             }
+
         }
         return answer;
     }

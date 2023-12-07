@@ -1,6 +1,7 @@
 package org.edu.service.enums;
 
 
+//перечисление комманд бота
 public enum ServiceCommands {
     HELP("/help"), //запись на занятие
     APPOINTMENT("/appointment"), CANCEL("/cancel"), //инфа по группам, записям и т.д.
@@ -9,7 +10,7 @@ public enum ServiceCommands {
 
     private final String cmd;
 
-
+//переопределение методов
     ServiceCommands(String cmd) {
         this.cmd = cmd;
     }
