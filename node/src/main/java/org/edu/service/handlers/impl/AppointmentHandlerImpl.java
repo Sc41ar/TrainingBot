@@ -144,7 +144,7 @@ public class AppointmentHandlerImpl implements AppointmentHandler {
     public void notifyAdmin(AppUser appUser, int count) {
         var admins = appUserDao.findAll(hasRole(UserState.ADMIN_STATE));
         for (var user : admins) {
-            sendAnswer("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + "активировал абонемент на " + count + " занятий", user.getTelegramUserId());
+            sendAnswer("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + " активировал абонемент на " + count + " занятий", user.getTelegramUserId());
         }
     }
 

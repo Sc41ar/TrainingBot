@@ -40,6 +40,7 @@ public class AuthHandlerImpl implements AuthHandler {
         var manager = appUserDao.findById(managerId);
 
         sendAnswer("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + " ожидает потверждения", admin.get().getTelegramUserId());
+        sendAnswer("Пользователь " + appUser.getFirstName() + " @" + appUser.getUsername() + " ожидает потверждения", manager.get().getTelegramUserId());
 
         admin.get().setBotState(BotState.AUTHENTICATION);
         manager.get().setBotState(BotState.AUTHENTICATION);

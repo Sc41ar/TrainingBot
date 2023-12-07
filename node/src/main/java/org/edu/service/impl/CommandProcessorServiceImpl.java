@@ -132,6 +132,7 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
             }
             case "single", "trial" -> {
                 appointmentHandler.saveSubsCapacity(appUser, 1);
+                appointmentHandler.notifyAdmin(appUser, 1);
                 sendMessage.setText("Выбрано пробное занятие\nВведите дату и нзвание группы");
             }
             case "subscription" -> {
@@ -141,26 +142,31 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
             case "four" -> {
                 var count = 4;
                 appointmentHandler.saveSubsCapacity(appUser, count);
+                appointmentHandler.notifyAdmin(appUser, count);
                 sendMessage.setText("Выбрано " + count + " занятия");
             }
             case "eight" -> {
                 var count = 8;
                 appointmentHandler.saveSubsCapacity(appUser, count);
+                appointmentHandler.notifyAdmin(appUser, count);
                 sendMessage.setText("Выбрано " + count + " занятия");
             }
             case "twelve" -> {
                 var count = 12;
                 appointmentHandler.saveSubsCapacity(appUser, count);
+                appointmentHandler.notifyAdmin(appUser, count);
                 sendMessage.setText("Выбрано " + count + " занятия");
             }
             case "twenty" -> {
                 var count = 20;
                 appointmentHandler.saveSubsCapacity(appUser, count);
+                appointmentHandler.notifyAdmin(appUser, count);
                 sendMessage.setText("Выбрано " + count + " занятия");
             }
             case "forty" -> {
                 var count = 40;
                 appointmentHandler.saveSubsCapacity(appUser, count);
+                appointmentHandler.notifyAdmin(appUser, count);
                 sendMessage.setText("Выбрано " + count + " занятия");
             }
             default -> {
