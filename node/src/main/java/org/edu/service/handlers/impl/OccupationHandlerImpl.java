@@ -54,6 +54,7 @@ public class OccupationHandlerImpl implements OccupationHandler {
         var singleAppointmentRegexCheck = string.matches(FORMAT_REGEX);
 
         if (!singleAppointmentRegexCheck) {//questionable
+            returnBasicState(appUser);
             return "Error format";
         }
         var parsedOccupation = parseOccupation(string);
