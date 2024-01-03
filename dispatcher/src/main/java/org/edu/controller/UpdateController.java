@@ -32,8 +32,16 @@ public class UpdateController {
         if (update == null) {
             log.error("Received update is null");
             return;
-        }//Защита от
-        if (update.getPoll() == null && !update.getMessage().hasPhoto() && !update.getMessage().hasDocument() && update.getMessage().hasText())
+        }//Защита от качингсов
+        if (  update.hasCallbackQuery()  ||
+                (update.getPoll() == null
+                    && !update.getMessage().hasPhoto()
+                    && !update.getMessage().hasDocument()
+                    && update.getMessage().hasText()
+                ) ||
+                update.getMessage().hasVideoNote()
+
+        )
             processTextMessage(update);
     }
     //вызов сервиса отправителя

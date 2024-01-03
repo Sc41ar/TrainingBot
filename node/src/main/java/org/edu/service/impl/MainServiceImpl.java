@@ -41,6 +41,10 @@ public class MainServiceImpl implements MainService {
         if (update.hasCallbackQuery()) {
             appUser = appUserDao.findAppUserByTelegramUserId(update.getCallbackQuery().getFrom().getId());
             sendAnswer(commandProcessorService.processCallBackQuery(update.getCallbackQuery(), appUser));
+        } else if (update.getMessage().hasVideoNote()) {
+            appUser = findOrSaveAppuser(update.getMessage());
+            sendAnswer(new SendMessage( appUser.getTelegramUserId().toString(), commandProcessorService.processVideoNote()));
+
         } else {
             appUser = findOrSaveAppuser(update.getMessage());
             var text = update.getMessage().getText();

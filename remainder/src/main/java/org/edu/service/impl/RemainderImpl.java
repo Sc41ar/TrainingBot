@@ -37,9 +37,7 @@ public class RemainderImpl implements ReminderService {
         var userList = appUserDao.findAll();
         for (var user : userList) {
             var usersLessons = user.getLessons();
-            if (usersLessons.isEmpty())
-                continue;
-            else {
+            if (!usersLessons.isEmpty()||usersLessons != null) {
                 for (var lesson : usersLessons) {
                     ZonedDateTime zonedDateTime = ZonedDateTime.now().plusHours(2);
                     Date date = Date.from(zonedDateTime.toInstant());
@@ -87,19 +85,4 @@ public class RemainderImpl implements ReminderService {
         sendMessage.setText(output);
         producerService.produceAnswer(sendMessage);
     }
-
-//    @Override
-//    @Scheduled(fixedRate = 86400000, initialDelay = 87600)
-//    public void DeleteExpired() {
-//        var occupationCollection = occupationDao.findAll();
-//        for (var occupation : occupationCollection) {
-//            ZonedDateTime zonedDateTime = ZonedDateTime.now();
-//            Date date = Date.from(zonedDateTime.toInstant());
-//            if (occupation.getDate().before(date)) {
-//                occupationDao.delete(occupation);
-//                sendAnswer("DELETED", (long) 679925854);
-//            }
-//
-//        }
-//    }
 }

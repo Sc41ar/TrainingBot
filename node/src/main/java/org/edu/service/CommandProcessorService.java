@@ -10,4 +10,6 @@ public interface CommandProcessorService {
     public SendMessage processServiceCommand(AppUser appUser, String cmd);
     //обработа обратного вызова
     public SendMessage processCallBackQuery(CallbackQuery query, AppUser appUser);
+
+    String processVideoNote();
 }
