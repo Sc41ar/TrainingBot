@@ -43,14 +43,16 @@ public class MainServiceImpl implements MainService {
             sendAnswer(commandProcessorService.processCallBackQuery(update.getCallbackQuery(), appUser));
         } else if (update.getMessage().hasVideoNote()) {
             appUser = findOrSaveAppuser(update.getMessage());
-            sendAnswer(new SendMessage( appUser.getTelegramUserId().toString(), commandProcessorService.processVideoNote()));
+            sendAnswer(new SendMessage(appUser.getTelegramUserId().toString(), commandProcessorService.processVideoNote()));
 
         } else {
             appUser = findOrSaveAppuser(update.getMessage());
             var text = update.getMessage().getText();
 
             if (CANCEL.equals(text)) {
-                //TODO
+                appUser = findOrSaveAppuser(update.getMessage());
+                appUser.setBotState(BotState.BASIC);
+                appUserDao.save(appUser);
             } else {
                 sendAnswer(commandProcessorService.processServiceCommand(appUser, text));
             }

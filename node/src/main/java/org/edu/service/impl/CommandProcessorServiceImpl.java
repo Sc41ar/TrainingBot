@@ -209,11 +209,6 @@ public class CommandProcessorServiceImpl implements CommandProcessorService {
         return sendMessage;
     }
 
-    @Override
-    public String processVideoNote() {
-        return "Ты зачем боту кружок отправил?\nНорм все что я, блять, ответить то должен?\uD83D\uDC85\uD83C\uDFFB";
-    }
-
     private void sendAnswer(String output, Long chatId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);

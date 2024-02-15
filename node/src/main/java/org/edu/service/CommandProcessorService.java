@@ -11,5 +11,4 @@ public interface CommandProcessorService {
     //обработа обратного вызова
     public SendMessage processCallBackQuery(CallbackQuery query, AppUser appUser);
 
-    String processVideoNote();
 }
